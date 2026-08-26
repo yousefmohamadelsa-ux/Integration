@@ -3,227 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار جميع أمثلة التكامل الشاملة - Examples Quiz</title>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <title>تسجيل الدخول بـ Google</title>
+    <!-- تحميل مكتبة Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; direction: rtl; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #7f8c8d; font-size: 0.95em; margin-bottom: 20px; }
-        .progress-bar { width: 100%; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 20px; }
-        .progress { width: 0%; height: 100%; background: #8e44ad; transition: width 0.3s; }
-        .question-card { border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background: #fafafa; margin-bottom: 20px; }
-        .question-title { font-weight: bold; color: #8e44ad; margin-bottom: 10px; font-size: 1.1em; }
-        .question-text { font-size: 1.2em; margin-bottom: 20px; direction: ltr; text-align: center; padding: 15px; background: #fff; border: 1px solid #eee; }
-        textarea { width: 100%; height: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; margin-bottom: 15px; resize: vertical; }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-check { background: #8e44ad; color: white; }
-        .btn-check:hover { background: #732d91; }
-        .btn-next { background: #27ae60; color: white; }
-        .btn-prev { background: #7f8c8d; color: white; }
-        .solution { display: none; margin-top: 15px; padding: 15px; background: #f3e5f5; border-right: 4px solid #8e44ad; border-radius: 4px; direction: ltr; text-align: left; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f2f5;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #1a1a2e;
+            margin-bottom: 30px;
+        }
+        #g_id_signin {
+            display: flex;
+            justify-content: center;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+        .status.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>اختبار جميع أمثلة الـ Examples</h1>
-    <div class="subtitle">Math2 (BS1206) — جميع الأمثلة من 1 إلى 12</div>
-    
-    <div class="progress-bar">
-        <div class="progress" id="progress"></div>
+    <div class="container">
+        <h1>🔐 تسجيل الدخول بـ Google</h1>
+        
+        <!-- زر تسجيل الدخول -->
+        <div id="g_id_signin"></div>
+        
+        <div id="statusMessage" class="status"></div>
     </div>
 
-    <div class="question-card">
-        <div class="question-title" id="q-title">سؤال 1</div>
-        <div class="question-text" id="q-text"></div>
+    <script>
+        // ============================================================
+        // دالة معالجة الاستجابة من Google
+        // ============================================================
+        function handleCredentialResponse(response) {
+            console.log("✅ تم استلام التوكن:", response.credential);
+            
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status success';
+            statusDiv.textContent = '✅ تم تسجيل الدخول بنجاح!';
+            
+            // هنا يمكنك إرسال التوكن إلى الخادم أو استخدامه مع Firebase
+            // مثال: firebase.auth().signInWithCredential(credential)
+        }
+
+        // ============================================================
+        // تهيئة زر Google
+        // ============================================================
+        window.onload = function() {
+            console.log('⏳ جاري تهيئة زر Google...');
+            
+            // التحقق من تحميل المكتبة
+            if (typeof google === 'undefined') {
+                console.error('❌ مكتبة Google لم يتم تحميلها');
+                const statusDiv = document.getElementById('statusMessage');
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '⚠️ فشل تحميل مكتبة Google. تأكد من اتصال الإنترنت.';
+                return;
+            }
+
+            try {
+                google.accounts.id.initialize({
+                    client_id: '358188138966-0fjp4adkc3t2ibj9iveka5kmf0a0h4v2.apps.googleusercontent.com',
+                    callback: handleCredentialResponse, // ✅ الدالة التي سيتم استدعاؤها
+                    context: 'signin',
+                    ux_mode: 'popup',
+                    auto_prompt: false,
+                    // يمكن إضافة هذه الخيارات لتخصيص الزر بشكل أكبر
+                    // itp_support: true,
+                });
+
+                google.accounts.id.renderButton(
+                    document.getElementById('g_id_signin'),
+                    {
+                        type: 'standard',
+                        shape: 'pill',
+                        theme: 'outline',
+                        text: 'signin_with',
+                        size: 'large',
+                        logo_alignment: 'left',
+                        // width: 300
+                    }
+                );
+
+                console.log('✅ تم تهيئة زر Google بنجاح');
+            } catch (error) {
+                console.error('❌ خطأ في تهيئة Google:', error);
+                const statusDiv = document.getElementById('statusMessage');
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '⚠️ حدث خطأ في تهيئة زر Google';
+            }
+        };
         
-        <label for="user-answer" style="display:block; margin-bottom: 5px; font-weight: bold; direction: rtl; text-align: right;">مسودة الحل:</label>
-        <textarea id="user-answer" placeholder="اكتب خطتك للحل هنا..."></textarea>
-        
-        <div class="btn-group">
-            <button class="btn btn-check" onclick="checkAnswer()">تحقق من الإجابة</button>
-            <button class="btn btn-next" onclick="nextQuestion()">التالي &larr;</button>
-            <button class="btn btn-prev" onclick="prevQuestion()">&rarr; السابق</button>
-        </div>
-
-        <div class="solution" id="solution">
-            <strong style="color:#8e44ad; display:block; margin-bottom: 5px; direction: rtl; text-align: right;">الإجابة النموذجية:</strong>
-            <div id="solution-text"></div>
-        </div>
-    </div>
-</div>
-
-<script>
-const examplesQuestions = [
-    // --- Examples 1 ---
-    { q: "\\int 5 \\, dx", a: "5x + C", ref: "Examples 1 - Q1" },
-    { q: "\\int (x^4 + 3x^2 - x + 4) \\, dx", a: "\\frac{x^5}{5} + x^3 - \\frac{x^2}{2} + 4x + C", ref: "Examples 1 - Q2" },
-    { q: "\\int (x^3 + x - 6)\\sqrt{x} \\, dx", a: "\\frac{2}{9}x^{9/2} + \\frac{2}{5}x^{5/2} - 4x^{3/2} + C", ref: "Examples 1 - Q3" },
-    { q: "\\int \\left(x^3 + \\sqrt[3]{x} - \\frac{1}{\\sqrt{x}} + \\frac{1}{x\\sqrt{x}}\\right) dx", a: "\\frac{x^4}{4} + \\frac{3}{4}x^{4/3} - 2\\sqrt{x} - \\frac{2}{\\sqrt{x}} + C", ref: "Examples 1 - Q4" },
-    { q: "\\int \\left(5x^4 + \\sqrt{x} - \\frac{1}{x^3}\\right) dx", a: "x^5 + \\frac{2}{3}x^{3/2} + \\frac{1}{2x^2} + C", ref: "Examples 1 - Q5" },
-    { q: "\\int (2x + 5)^8 \\, dx", a: "\\frac{1}{18}(2x+5)^9 + C", ref: "Examples 1 - Q6" },
-    { q: "\\int \\frac{x^5 + x - 2}{\\sqrt{x}} \\, dx", a: "\\frac{2}{11}x^{11/2} + \\frac{2}{3}x^{3/2} - 4\\sqrt{x} + C", ref: "Examples 1 - Q7" },
-    { q: "\\int \\sqrt{x + 1} \\, dx", a: "\\frac{2}{3}(x+1)^{3/2} + C", ref: "Examples 1 - Q8" },
-    { q: "\\int x\\sqrt{x + 1} \\, dx", a: "\\frac{2}{5}(x+1)^{5/2} - \\frac{2}{3}(x+1)^{3/2} + C", ref: "Examples 1 - Q9" },
-    { q: "\\int \\frac{x}{\\sqrt{1 + x^2}} \\, dx", a: "\\sqrt{1+x^2} + C", ref: "Examples 1 - Q10" },
-    { q: "\\int \\sin^5 x \\cos x \\, dx", a: "\\frac{1}{6}\\sin^6 x + C", ref: "Examples 1 - Q11" },
-    { q: "\\int \\sec^2 x \\tan^2 x \\, dx", a: "\\frac{1}{3}\\tan^3 x + C", ref: "Examples 1 - Q12" },
-    { q: "\\int \\sec^8 x \\tan x \\, dx", a: "\\frac{1}{8}\\sec^8 x + C", ref: "Examples 1 - Q13" },
-    { q: "\\int \\sec^2 x \\sqrt{1 + \\tan x} \\, dx", a: "\\frac{2}{3}(1+\\tan x)^{3/2} + C", ref: "Examples 1 - Q14" },
-    { q: "\\int e^{-x}\\sqrt{1 - e^{-x}} \\, dx", a: "\\frac{2}{3}(1-e^{-x})^{3/2} + C", ref: "Examples 1 - Q15" },
-    { q: "\\int \\frac{e^x}{\\sqrt{e^x + 1}} \\, dx", a: "{e^x+1}^.5  / 0.5  + C", ref: "Examples 1 - Q16" },
-    { q: "\\int e^x(e^x + 9)^8 \\, dx", a: "\\frac{1}{9}(e^x+9)^9 + C", ref: "Examples 1 - Q17" },
-    { q: "\\int \\frac{\\tan^{-1} x}{x^2 + 1} \\, dx", a: "\\frac{1}{2}(\\tan^{-1}x)^2 + C", ref: "Examples 1 - Q18" },
-    { q: "\\int \\frac{\\ln x}{x} \\, dx", a: "\\frac{1}{2}(\\ln x)^2 + C", ref: "Examples 1 - Q19" },
-    { q: "\\int \\frac{1}{x\\sqrt{1 + \\ln x}} \\, dx", a: "{1+lnx}^.5 /0.5 + C", ref: "Examples 1 - Q20" },
-    { q: "\\int \\frac{1}{\\sqrt{x + 1} - \\sqrt{x}} \\, dx", a: "\\frac{2}{3}(x+1)^{3/2} + \\frac{2}{3}x^{3/2} + C", ref: "Examples 1 - Q21" },
-    { q: "f'(x) = x^3 - 5x + 2, \\ f(0) = 1 \\implies f(x) = ?", a: "f(x) = \\frac{x^4}{4} - \\frac{5}{2}x^2 + 2x + 1", ref: "Examples 1 - Q22" },
-
-    // --- Examples 2 ---
-    { q: "\\int \\cos 5x \\, dx", a: "\\frac{1}{5}\\sin 5x + C", ref: "Examples 2 - Q1" },
-    { q: "\\int x \\sin(x^2) \\, dx", a: "-\\frac{1}{2}\\cos(x^2) + C", ref: "Examples 2 - Q2" },
-    { q: "\\int x \\sec^2(x^2 - 5) \\, dx", a: "\\frac{1}{2}\\tan(x^2-5) + C", ref: "Examples 2 - Q3" },
-    { q: "\\int \\sec x \\tan x \\, dx", a: "\\sec x + C", ref: "Examples 2 - Q4" },
-    { q: "\\int \\sin^2 x \\, dx", a: "(1-cos^2x) + C", ref: "Examples 2 - Q5" },
-    { q: "\\int \\cos^2 x \\, dx", a: "(1+cos^2x) + C", ref: "Examples 2 - Q6" },
-    { q: "\\int \\tan^2 x \\, dx", a: "\\tan x - x + C", ref: "Examples 2 - Q7" },
-    { q: "\\int \\sin^3 x \\, dx", a: "-\\cos x + \\frac{1}{3}\\cos^3 x + C", ref: "Examples 2 - Q8" },
-    { q: "\\int \\cos^3 x \\, dx", a: "\\sin x - \\frac{1}{3}\\sin^3 x + C", ref: "Examples 2 - Q9" },
-    { q: "\\int \\cos(\\sin x) \\cos x \\, dx", a: "\\sin(\\sin x) + C", ref: "Examples 2 - Q10" },
-    { q: "\\int (\\sin x + \\cos x)^2 \\, dx", a: "x - \\frac{1}{2}\\cos 2x + C", ref: "Examples 2 - Q11" },
-    { q: "\\int \\frac{x}{\\sec(x^2)} \\, dx", a: "\\frac{1}{2}\\sin(x^2) + C", ref: "Examples 2 - Q12" },
-    { q: "f'(x) = \\sin x \\cos x, \\ f(0) = 2 \\implies f(x) = ?", a: "f(x) = \\frac{1}{2}\\sin^2 x + 2", ref: "Examples 2 - Q13" },
-
-    // --- Examples 3 ---
-    { q: "\\int e^{3x} \\, dx", a: "\\frac{1}{3}e^{3x} + C", ref: "Examples 3 - Q1" },
-    { q: "\\int e^{x-5} \\, dx", a: "e^{x-5} + C", ref: "Examples 3 - Q2" },
-    { q: "\\int x e^{x^2} \\, dx", a: "\\frac{1}{2}e^{x^2} + C", ref: "Examples 3 - Q3" },
-    { q: "\\int \\sec^2 x e^{\\tan x} \\, dx", a: "e^{\\tan x} + C", ref: "Examples 3 - Q4" },
-    { q: "\\int (e^x + e^{-x})^2 \\, dx", a: "\\frac{1}{2}e^{2x} + 2x - \\frac{1}{2}e^{-2x} + C", ref: "Examples 3 - Q5" },
-    { q: "\\int \\sec^2(2x + 5) e^{\\tan(2x + 5)} \\, dx", a: "\\frac{1}{2}e^{\\tan(2x+5)} + C", ref: "Examples 3 - Q6" },
-    { q: "\\int \\frac{e^{1/x}}{x^2} \\, dx", a: "-e^{1/x} + C", ref: "Examples 3 - Q7" },
-    { q: "\\int \\frac{e^x + 1}{e^x} \\, dx", a: "x - e^{-x} + C", ref: "Examples 3 - Q8" },
-
-    // --- Examples 4 ---
-    { q: "\\int \\frac{1}{x} \\, dx", a: "\\ln|x| + C", ref: "Examples 4 - Q1" },
-    { q: "\\int \\frac{1}{x + 1} \\, dx", a: "\\ln|x+1| + C", ref: "Examples 4 - Q2" },
-    { q: "\\int \\frac{x + 1}{x^2 + 2x + 5} \\, dx", a: "\\frac{1}{2}\\ln|x^2+2x+5| + C", ref: "Examples 4 - Q3" },
-    { q: "\\int \\tan x \\, dx", a: "-\\ln|\\cos x| + C = ln(sec(x))", ref: "Examples 4 - Q4" },
-    { q: "\\int \\frac{e^x}{e^x + 1} \\, dx", a: "\\ln(e^x+1) + C", ref: "Examples 4 - Q5" },
-    { q: "\\int \\frac{\\sin 2x}{1 + \\sin^2 x} \\, dx", a: "\\ln(1+\\sin^2 x) + C", ref: "Examples 4 - Q6" },
-    { q: "\\int \\frac{1}{x + x \\ln x} \\, dx", a: "\\ln|1+\\ln x| + C", ref: "Examples 4 - Q7" },
-    { q: "\\int \\frac{x}{x + 1} \\, dx", a: "x - \\ln|x+1| + C", ref: "Examples 4 - Q8" },
-    { q: "\\int \\frac{x - 1}{x + 1} \\, dx", a: "x - 2\\ln|x+1| + C", ref: "Examples 4 - Q9" },
-    { q: "\\int \\tan^3 x \\, dx", a: "\\frac{1}{2}\\tan^2 x + \\ln|\\cos x| + C", ref: "Examples 4 - Q10" },
-    { q: "\\int \\sec x \\, dx", a: "\\ln|\\sec x + \\tan x| + C", ref: "Examples 4 - Q11" },
-
-    // --- Examples 5 ---
-    { q: "\\int \\frac{1}{x^2 + 3} \\, dx", a: "\\frac{1}{\\sqrt{3}}\\tan^{-1}\\left(\\frac{x}{\\sqrt{3}}\\right) + C", ref: "Examples 5 - Q1" },
-    { q: "\\int \\frac{x^2}{x^2 + 3} \\, dx", a: "x - \\sqrt{3}\\tan^{-1}\\left(\\frac{x}{\\sqrt{3}}\\right) + C", ref: "Examples 5 - Q2" },
-    { q: "\\int \\frac{1}{9 - (x + 5)^2} \\, dx", a: " 1/3 tanh−1 (𝑥 +5 )/3 +C ", ref: "Examples 5 - Q3" },
-    { q: "\\int \\frac{e^x}{\\sqrt{9 - e^{2x}}} \\, dx", a: "\\sin^{-1}\\left(\\frac{e^x}{3}\\right) + C", ref: "Examples 5 - Q4" },
-    { q: "\\int \\frac{1}{x\\sqrt{1 - \\ln^2 x}} \\, dx", a: "\\sin^{-1}(\\ln x) + C", ref: "Examples 5 - Q5" },
-    { q: "\\int \\frac{1}{x - x \\ln^2 x} \\, dx", a: "\\tanh^{-1}(\\ln x) + C", ref: "Examples 5 - Q6" },
-    { q: "\\int \\frac{1}{x(4 + \\ln^2 x)} \\, dx", a: "\\frac{1}{2}\\tan^{-1}\\left(\\frac{\\ln x}{2}\\right) + C", ref: "Examples 5 - Q7" },
-    { q: "\\int \\frac{e^x}{4 + e^{2x}} \\, dx", a: "\\frac{1}{2}\\tan^{-1}\\left(\\frac{e^x}{2}\\right) + C", ref: "Examples 5 - Q8" },
-    { q: "\\int \\frac{e^x}{\\sqrt{e^{2x} - 1}} \\, dx", a: "\\cosh^{-1}(e^x) + C", ref: "Examples 5 - Q9" },
-    { q: "\\int \\frac{e^x}{1 - e^{2x}} \\, dx", a: "\\tanh^{-1}(e^x) + C", ref: "Examples 5 - Q10" },
-    { q: "\\int \\frac{e^x}{\\sqrt{e^{2x} + 1}} \\, dx", a: "\\sinh^{-1}(e^x) + C", ref: "Examples 5 - Q11" },
-    { q: "\\int \\frac{e^x}{e^{2x} + 1} \\, dx", a: "\\tan^{-1}(e^x) + C", ref: "Examples 5 - Q12" },
-
-    // --- Examples 6 ---
-    { q: "\\int \\frac{dx}{x^2 + 4x + 2}", a: "-\\frac{1}{\\sqrt{2}}\\tanh^{-1}\\left(\\frac{x+2}{\\sqrt{2}}\\right) + C", ref: "Examples 6 - Q1" },
-    { q: "\\int \\frac{dx}{2x^2 + 12x + 20}", a: "\\frac{1}{2}\\tan^{-1}(x+3) + C", ref: "Examples 6 - Q2" },
-    { q: "\\int \\frac{dx}{\\sqrt{x^2 + 10x + 30}}", a: "\\sinh^{-1}\\left(\\frac{x+5}{\\sqrt{5}}\\right) + C", ref: "Examples 6 - Q3" },
-
-    // --- Examples 7 ---
-    { q: "\\int x e^{2x} \\, dx", a: "\\frac{x}{2}e^{2x} - \\frac{1}{4}e^{2x} + C", ref: "Examples 7 - Q(a)" },
-    { q: "\\int x \\sin x \\, dx", a: "-x\\cos x + \\sin x + C", ref: "Examples 7 - Q(b)" },
-    { q: "\\int x \\sec^2 x \\, dx", a: "x\\tan x + \\ln|\\cos x| + C", ref: "Examples 7 - Q(c)" },
-    { q: "\\int x \\sin x \\cos x \\, dx", a: "\\frac{x}{2}\\sin^2 x - \\frac{1}{4}\\left(x - \\frac{\\sin 2x}{2}\\right) + C", ref: "Examples 7 - Q(d)" },
-
-    // --- Examples 8 ---
-    { q: "\\int x^2 \\ln x \\, dx", a: "\\frac{x^3}{3}\\ln x - \\frac{x^3}{9} + C", ref: "Examples 8 - Q(a)" },
-    { q: "\\int \\ln(x + 1) \\, dx", a: " 𝑥 ln( 𝑥 + 1) − 𝑥 + ln( 𝑥 + 1) + C ", ref: "Examples 8 - Q(b)" },
-    { q: "\\int \\ln\\left(\\frac{1}{x}\\right) \\, dx", a: "-x\\ln x + x + C", ref: "Examples 8 - Q(c)" },
-    { q: "\\int \\sin^{-1} x \\, dx", a: "x\\sin^{-1} x + \\sqrt{1-x^2} + C", ref: "Examples 8 - Q(d)" },
-    { q: "\\int x \\tan^{-1} x \\, dx", a: "\\frac{x^2+1}{2}\\tan^{-1} x - \\frac{x}{2} + C", ref: "Examples 8 - Q(e)" },
-    { q: "\\int \\tanh^{-1} x \\, dx", a: "x\\tanh^{-1} x + \\frac{1}{2}\\ln|1-x^2| + C", ref: "Examples 8 - Q(f)" },
-    { q: "\\int x (\\ln x)^2 \\, dx", a: "\\frac{1}{2}x^2(\\ln x)^2 - \\frac{1}{2}x^2\\ln x + \\frac{1}{4}x^2 + C", ref: "Examples 8 - Q(g)" },
-
-    // --- Examples 9 ---
-    { q: "\\int x^2 \\sqrt{x + 1} \\, dx", a: "\\text{Sub: } u=x+1 \\rightarrow \\frac{2}{7}u^{7/2} - \\frac{4}{5}u^{5/2} + \\frac{2}{3}u^{3/2} + C", ref: "Examples 9 - Q1" },
-    { q: "\\int e^{2x} \\sqrt{e^x - 1} \\, dx", a: "\\frac{2}{5}(e^x-1)^{5/2} + \\frac{2}{3}(e^x-1)^{3/2} + C", ref: "Examples 9 - Q2" },
-    { q: "\\int x^2 (2x - 3)^{14} \\, dx", a: "\\text{By Parts / Substitution } u=2x-3", ref: "Examples 9 - Q3" },
-    { q: "\\int \\frac{x^3}{\\sqrt{x^2 - 1}} \\, dx", a: "\\frac{1}{3}(x^2-1)^{3/2} + \\sqrt{x^2-1} + C", ref: "Examples 9 - Q4" },
-
-    // --- Examples 10 ---
-    { q: "\\int_0^3 (7x^6 + 3x^2 - x - 6) \\, dx", a: "2209.5", ref: "Examples 10 - Q1" },
-    { q: "\\int_{-\\pi}^{\\pi} x^4 e^{\\sin x} \\, dx", a: "0", ref: "Examples 10 - Q2" },
-    { q: "\\int_1^4 \\left(5x^4 + \\sqrt{x} - \\frac{1}{x\\sqrt{x}}\\right) dx", a: "\\frac{3080}{3}", ref: "Examples 10 - Q3" },
-    { q: "\\int_0^{\\pi/3} \\cos^2 x \\, dx", a: "\\frac{1}{2}\\left(\\frac{\\pi}{3} + \\frac{\\sqrt{3}}{4}\\right)", ref: "Examples 10 - Q4" },
-    { q: "\\int_0^1 x e^x \\, dx", a: "1", ref: "Examples 10 - Q5" },
-    { q: "\\int_1^1 \\frac{1}{1 + x^2} \\, dx", a: "0", ref: "Examples 10 - Q6" },
-
-    // --- Examples 11 (Applications: Area) ---
-    { q: "\\text{Area bounded by } y = \\sqrt{x}, \\text{ x-axis, and } x = 9 \\implies \\int_0^9 \\sqrt{x} \\, dx", a: "18 \\text{ Units}", ref: "Examples 11 - Q1" },
-    { q: "\\text{Area bounded by } y = x^2 \\text{ and } y = x \\implies \\int_0^1 (x - x^2) \\, dx", a: "\\frac{1}{6} \\text{ Units}", ref: "Examples 11 - Q2" },
-    { q: "\\text{Area bounded by } y = x^2, \\text{ x-axis, and } x = 2 \\implies \\int_0^2 x^2 \\, dx", a: "\\frac{8}{3} \\text{ Units}", ref: "Examples 11 - Q3" },
-    { q: "\\text{Area bounded by } y = 3 - x \\text{ and } y = x^2 - 9 \\implies \\int_{-4}^{3} (12 - x - x^2) \\, dx", a: "\\frac{343}{6} \\text{ Units}", ref: "Examples 11 - Q4" },
-    { q: "\\text{Area bounded by } y = 6 - x \\text{ and } y = 8 - x^2 \\implies \\int_{-1}^{2} (2 + x - x^2) \\, dx", a: "4.5 \\text{ Units}", ref: "Examples 11 - Q5" },
-    { q: "\\text{Area bounded by } y = x^3 - x^2 - 2x \\text{ and x-axis} \\implies \\int_{-1}^{0} (x^3-x^2-2x)dx + \\int_{0}^{2} -(x^3-x^2-2x)dx", a: "\\frac{37}{12} \\text{ Units}", ref: "Examples 11 - Q6" },
-
-    // --- Examples 12 (Applications: Volume of Solids of Revolution) ---
-    { q: "\\text{Volume of solid formed by revolving } y = \\sqrt{x}, \\text{ x-axis, and } x = 9 \\text{ about x-axis} \\implies \\pi \\int_0^9 (\\sqrt{x})^2 dx", a: "\\frac{81\\pi}{2} \\text{ Units}", ref: "Examples 12 - Q1" },
-    { q: "\\text{Volume of solid formed by revolving } y = x^2, \\text{ x-axis, and } 1 \\le x \\le 2 \\text{ about x-axis} \\implies \\pi \\int_1^2 (x^2)^2 dx", a: "\\frac{31}{5}\\pi \\text{ Units}", ref: "Examples 12 - Q2" },
-    { q: "\\text{Volume of solid formed by revolving } y = x^2 \\text{ and } y = x \\text{ about x-axis} \\implies \\pi \\int_0^1 (x^2 - x^4) dx", a: "\\frac{2}{15}\\pi \\text{ Units}", ref: "Examples 12 - Q3" },
-    { q: "\\text{Volume of solid formed by revolving } y = 6-x \\text{ and } y = 8-x^2 \\text{ about x-axis} \\implies \\pi \\int_{-1}^2 \\left((8-x^2)^2 - (6-x)^2\\right) dx", a: "57.6\\pi \\text{ Units}", ref: "Examples 12 - Q4" },
-    { q: "\\text{Volume of solid formed by revolving } y = x^3 - x^2 - 2x \\text{ and x-axis about x-axis}", a: "\\frac{162}{35}\\pi \\text{ Units}", ref: "Examples 12 - Q5" }
-];
-
-let currentIndex = 0;
-
-function renderQuestion() {
-    const q = examplesQuestions[currentIndex];
-    document.getElementById('q-title').innerText = `سؤال ${currentIndex + 1} من ${examplesQuestions.length} (${q.ref})`;
-    document.getElementById('q-text').innerHTML = `\\[${q.q}\\]`;
-    document.getElementById('solution-text').innerHTML = `\\[${q.a}\\]`;
-    document.getElementById('user-answer').value = '';
-    document.getElementById('solution').style.display = 'none';
-    document.getElementById('progress').style.width = `${((currentIndex + 1) / examplesQuestions.length) * 100}%`;
-    
-    if (window.MathJax) {
-        MathJax.typesetPromise();
-    }
-}
-
-function checkAnswer() {
-    document.getElementById('solution').style.display = 'block';
-    if (window.MathJax) {
-        MathJax.typesetPromise();
-    }
-}
-
-function nextQuestion() {
-    if (currentIndex < examplesQuestions.length - 1) {
-        currentIndex++;
-        renderQuestion();
-    } else {
-        alert("ممتاز! لقد أتممت جميع أسئلة الأمثلة بنجاح.");
-    }
-}
-
-function prevQuestion() {
-    if (currentIndex > 0) {
-        currentIndex--;
-        renderQuestion();
-    }
-}
-
-renderQuestion();
-</script>
-
+    </script>
 </body>
 </html>
